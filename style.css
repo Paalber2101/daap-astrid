@@ -1,0 +1,267 @@
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── TOKENS ── */
+:root {
+  --rose:      #d4828f;
+  --deep-rose: #a85060;
+  --cream:     #fffaf9;
+  --text:      #3a2a2e;
+  --muted:     #8a6a70;
+  --blush:     #f7d6db;
+}
+
+/* ── BODY ── */
+body {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #fce8ec 0%, #f7d6db 45%, #f2cdd4 100%);
+  font-family: 'Quicksand', sans-serif;
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* ── BACKGROUND FLOWERS ── */
+.bg-flowers {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.bg-flower {
+  position: absolute;
+  opacity: 0.22;
+}
+.bg-tl { top: -20px;  left: -20px;  width: 300px; height: 320px; }
+.bg-tr { top: -20px;  right: -20px; width: 300px; height: 320px; }
+.bg-bl { bottom: -20px; left: -20px;  width: 300px; height: 320px; }
+.bg-br { bottom: -20px; right: -20px; width: 300px; height: 320px; }
+
+/* ── PAGE WRAPPER ── */
+.page-wrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  padding: 44px 16px 70px;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--cream);
+  border-radius: 22px;
+  box-shadow: 0 16px 60px rgba(150,70,90,.15), 0 3px 10px rgba(150,70,90,.08);
+  padding: 64px 52px 52px;
+  width: 100%;
+  max-width: 560px;
+  text-align: center;
+  position: relative;
+  animation: fadeUp 1.1s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── CORNER FLOWERS ── */
+.corner {
+  position: absolute;
+  pointer-events: none;
+}
+.corner.tl { top: -18px;    left: -18px; }
+.corner.tr { top: -18px;    right: -18px; }
+.corner.bl { bottom: -18px; left: -18px; }
+.corner.br { bottom: -18px; right: -18px; }
+
+/* ── TYPOGRAPHY ── */
+.dear {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.gname {
+  font-family: 'Great Vibes', cursive;
+  font-size: 36px;
+  color: var(--rose);
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.intro {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 2;
+  margin-bottom: 4px;
+}
+
+.bname {
+  font-family: 'Great Vibes', cursive;
+  font-size: 40px;
+  color: var(--text);
+  line-height: 1.25;
+  margin: 10px 0 28px;
+}
+
+.details {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--text);
+  font-weight: 500;
+  line-height: 2.5;
+  margin-bottom: 28px;
+}
+
+.prose {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 2;
+  margin-bottom: 10px;
+}
+
+.closing {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 24px;
+}
+
+.hosts {
+  font-family: 'Great Vibes', cursive;
+  font-size: 30px;
+  color: var(--rose);
+  margin-top: 4px;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 auto 24px;
+}
+.div-line {
+  width: 48px;
+  height: 1px;
+  background: var(--rose);
+  opacity: .3;
+}
+
+/* ── RSVP SECTION ── */
+.rsvp-sec {
+  margin-top: 36px;
+  padding-top: 30px;
+  border-top: 1px solid rgba(212,130,143,.2);
+}
+
+.rsvp-lbl {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+.btn-row { display: flex; flex-direction: column; gap: 11px; }
+
+.btn {
+  padding: 15px 28px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  transition: transform .15s, box-shadow .15s;
+}
+.btn:hover  { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(150,70,90,.22); }
+.btn:active { transform: scale(.98); }
+.btn-yes { background: var(--rose); color: #fff; }
+.btn-no  { background: transparent; color: var(--rose); border: 1.5px solid var(--rose); }
+
+/* ── FORM ── */
+.rsvp-form { display: none; margin-top: 22px; text-align: left; }
+.rsvp-form.on { display: block; animation: fadeUp .5s ease both; }
+
+.fg { margin-bottom: 15px; }
+.fg label {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+.fg input,
+.fg textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1.5px solid rgba(212,130,143,.28);
+  border-radius: 11px;
+  background: #fff;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s;
+  resize: none;
+}
+.fg input:focus,
+.fg textarea:focus { border-color: var(--rose); }
+
+.btn-sub {
+  width: 100%;
+  background: var(--deep-rose);
+  color: #fff;
+  padding: 15px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  margin-top: 7px;
+  transition: transform .15s, background .15s;
+}
+.btn-sub:hover { background: #8f3d4e; transform: translateY(-1px); }
+
+/* ── CONFIRMATION ── */
+.conf { display: none; margin-top: 22px; padding: 24px; background: rgba(212,130,143,.09); border-radius: 15px; text-align: center; }
+.conf.on { display: block; animation: fadeUp .5s ease both; }
+.conf-ico { font-size: 30px; margin-bottom: 10px; }
+.conf p {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+  font-style: italic;
+  color: var(--deep-rose);
+  line-height: 1.7;
+}
+
+/* ── MOBILE ── */
+@media (max-width: 480px) {
+  .card { padding: 44px 22px 38px; }
+  .bname { font-size: 32px; }
+  .gname { font-size: 28px; }
+  .corner { transform: scale(.72); }
+  .corner.tl { transform-origin: top left; }
+  .corner.tr { transform-origin: top right; }
+  .corner.bl { transform-origin: bottom left; }
+  .corner.br { transform-origin: bottom right; }
+  .bg-tl, .bg-tr, .bg-bl, .bg-br { width: 180px; height: 200px; }
+}
