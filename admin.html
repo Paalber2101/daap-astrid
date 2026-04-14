@@ -288,9 +288,13 @@ td .muted  { color: #bbb; font-style: italic; }
       <div class="n" id="sNo">–</div>
       <div class="l">Kan ikke komme</div>
     </div>
+    <div class="stat" style="--n-color:#7cb97c">
+      <div class="n" id="sVisits" style="color:#7cb97c">–</div>
+      <div class="l">Lenker åpnet</div>
+    </div>
   </div>
 
-  <!-- Table -->
+  <!-- RSVP Table -->
   <div class="table-head">
     <span id="tableLabel">Laster...</span>
     <button class="btn-csv" onclick="exportCSV()">Last ned CSV</button>
@@ -299,13 +303,22 @@ td .muted  { color: #bbb; font-style: italic; }
     <div class="loading">Henter svar...</div>
   </div>
 
+  <!-- Visits Table -->
+  <div class="table-head" style="margin-top:32px">
+    <span>Besøksoversikt per gjest</span>
+  </div>
+  <div class="table-wrap" id="visitWrap">
+    <div class="loading">Henter besøk...</div>
+  </div>
+
 </div>
 
 <script>
 const SUPABASE_URL = 'https://esubtibaucuzkzdaolge.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzdWJ0aWJhdWN1emt6ZGFvbGdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMjY1NTUsImV4cCI6MjA5MTcwMjU1NX0.ow8GbbGMiOlgNwvI0jZ2O38lHs8h7S6h7g4AwapVVWg';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzdWJ0aWJhdWN1emt6ZGFvbGdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc1MTmV4cCI6MjA2MzA4NjM4M30.ow8GbbGMi0lgNwvI0jZ2O38lHs8h7S6h7g4AwapVVWg';
 const PASSWORD = 'dåp2025';
 let rsvps = [];
+let visits = [];
 let currentLink = '';
 
 function login() {
@@ -313,7 +326,7 @@ function login() {
   if (pw === PASSWORD) {
     document.getElementById('loginWrap').style.display = 'none';
     document.getElementById('dash').style.display = 'block';
-    loadRsvps();
+    loadData();
   } else {
     document.getElementById('loginErr').textContent = 'Feil passord – prøv igjen.';
   }
@@ -326,20 +339,23 @@ function logout() {
   document.getElementById('loginErr').textContent = '';
 }
 
-async function loadRsvps() {
+async function loadData() {
   try {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/rsvps?select=*&order=created_at.desc', {
-      headers: {
-        'apikey':        SUPABASE_ANON,
-        'Authorization': 'Bearer ' + SUPABASE_ANON
-      }
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    rsvps = await res.json();
+    const [rsvpRes, visitRes] = await Promise.all([
+      fetch(SUPABASE_URL + '/rest/v1/rsvps?select=*&order=created_at.desc', {
+        headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON }
+      }),
+      fetch(SUPABASE_URL + '/rest/v1/visits?select=*&order=visited_at.desc', {
+        headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON }
+      })
+    ]);
+    if (!rsvpRes.ok) throw new Error('HTTP ' + rsvpRes.status);
+    rsvps  = await rsvpRes.json();
+    visits = visitRes.ok ? await visitRes.json() : [];
     renderDashboard();
   } catch (e) {
     document.getElementById('tableWrap').innerHTML =
-      '<div class="loading" style="color:#c62828">Kunne ikke hente data.<br>Sjekk at SUPABASE_URL og SUPABASE_ANON er riktig i config.js</div>';
+      '<div class="loading" style="color:#c62828">Kunne ikke hente data.<br>Sjekk at SUPABASE_URL og SUPABASE_ANON er riktig.</div>';
   }
 }
 
@@ -347,47 +363,69 @@ function renderDashboard() {
   const yes = rsvps.filter(r => r.attending).length;
   const no  = rsvps.filter(r => !r.attending).length;
 
-  document.getElementById('sTotal').textContent = rsvps.length;
-  document.getElementById('sYes').textContent   = yes;
-  document.getElementById('sNo').textContent    = no;
+  document.getElementById('sTotal').textContent  = rsvps.length;
+  document.getElementById('sYes').textContent    = yes;
+  document.getElementById('sNo').textContent     = no;
+  document.getElementById('sVisits').textContent = visits.length;
   document.getElementById('tableLabel').textContent = rsvps.length + ' svar totalt';
 
   if (rsvps.length === 0) {
     document.getElementById('tableWrap').innerHTML = '<div class="loading">Ingen svar ennå.</div>';
-    return;
+  } else {
+    const rows = rsvps.map(r => {
+      const d    = new Date(r.created_at);
+      const dato = d.toLocaleDateString('no-NO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const tid  = d.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' });
+      const antallBesøk = visits.filter(v => v.url_param === r.url_param).length;
+      return `<tr>
+        <td><strong>${esc(r.guest_name)}</strong></td>
+        <td><span class="badge ${r.attending ? 'yes' : 'no'}">${r.attending ? 'Kommer' : 'Kan ikke'}</span></td>
+        <td>${r.message ? esc(r.message) : '<span class="muted">–</span>'}</td>
+        <td style="text-align:center">${antallBesøk > 0 ? '👁 ' + antallBesøk : '<span class="muted">–</span>'}</td>
+        <td style="color:#aaa;font-size:13px;white-space:nowrap">${dato} ${tid}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('tableWrap').innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Navn</th>
+            <th>Svar</th>
+            <th>Melding</th>
+            <th>Åpnet</th>
+            <th>Tidspunkt</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
   }
 
-  const rows = rsvps.map(r => {
-    const d    = new Date(r.created_at);
-    const dato = d.toLocaleDateString('no-NO', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    const tid  = d.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' });
+  // Visits table
+  const uniqVisits = [...new Map(visits.map(v => [v.url_param, v])).values()];
+  const visitRows = uniqVisits.map(v => {
+    const antall  = visits.filter(x => x.url_param === v.url_param).length;
+    const svart   = rsvps.find(r => r.url_param === v.url_param);
+    const siste   = new Date(v.visited_at);
+    const dato    = siste.toLocaleDateString('no-NO', { day: '2-digit', month: '2-digit' });
+    const tid     = siste.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' });
     return `<tr>
-      <td><strong>${esc(r.guest_name)}</strong></td>
-      <td><span class="badge ${r.attending ? 'yes' : 'no'}">${r.attending ? 'Kommer' : 'Kan ikke'}</span></td>
-      <td>${r.message ? esc(r.message) : '<span class="muted">–</span>'}</td>
+      <td><strong>${esc(v.url_param || '–')}</strong></td>
+      <td style="text-align:center">👁 ${antall}</td>
+      <td>${svart ? '<span class="badge ' + (svart.attending ? 'yes' : 'no') + '">' + (svart.attending ? 'Svart ja' : 'Svart nei') + '</span>' : '<span class="muted">Ikke svart</span>'}</td>
       <td style="color:#aaa;font-size:13px;white-space:nowrap">${dato} ${tid}</td>
     </tr>`;
   }).join('');
 
-  document.getElementById('tableWrap').innerHTML = `
-    <table>
-      <thead>
-        <tr>
-          <th>Navn</th>
-          <th>Svar</th>
-          <th>Melding</th>
-          <th>Tidspunkt</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
+  document.getElementById('visitWrap').innerHTML = uniqVisits.length === 0
+    ? '<div class="loading">Ingen besøk ennå.</div>'
+    : `<table>
+        <thead><tr><th>Gjest</th><th>Åpninger</th><th>Status</th><th>Sist åpnet</th></tr></thead>
+        <tbody>${visitRows}</tbody>
+      </table>`;
 }
 
 function esc(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 function generateLink() {
@@ -412,11 +450,12 @@ function copyLink() {
 
 function exportCSV() {
   if (!rsvps.length) return alert('Ingen data å eksportere.');
-  const header = ['Navn', 'Svar', 'Melding', 'Tidspunkt'];
+  const header = ['Navn', 'Svar', 'Melding', 'Åpnet antall ganger', 'Tidspunkt'];
   const rows   = rsvps.map(r => [
     '"' + r.guest_name + '"',
     r.attending ? 'Kommer' : 'Kan ikke',
     '"' + (r.message || '').replace(/"/g, '""') + '"',
+    visits.filter(v => v.url_param === r.url_param).length,
     new Date(r.created_at).toLocaleString('no-NO')
   ]);
   const csv  = [header, ...rows].map(r => r.join(',')).join('\n');
