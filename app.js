@@ -11,7 +11,18 @@ if (gjest) {
   document.getElementById('guestName').style.display = 'none';
   document.getElementById('dearLabel').style.display = 'none';
 }
-
+if (gjest) {
+  fetch(SUPABASE_URL + '/rest/v1/visits', {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON,
+      'Authorization': 'Bearer ' + SUPABASE_ANON,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify({ url_param: gjest })
+  });
+}
 let attending = null;
 
 function showForm(isAttending) {
